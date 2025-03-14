@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Огірок чи Буряк - Інтерактивний Квіз</title>
+    <style>
+        :root {
+            --cucumber-color: #2D9D39;
+            --beetroot-color: #8E244D;
+            --background-dark: #121212;
+            --text-light: #FFFFFF;
+            --accent-color: #F7D02F;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: var(--background-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #121212 0%, #202020 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .menu-screen {
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        
+        .title {
+            font-size: 4.5rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            position: relative;
+            animation: pulse 3s infinite;
+        }
+        
+        .title span:first-child {
+            color: var(--cucumber-color);
+        }
+        
+        .title span:last-child {
+            color: var(--beetroot-color);
+        }
+        
+        .title span.versus {
+            color: var(--text-light);
+            font-size: 3rem;
+            margin: 0 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            color: var(--accent-color);
+        }
+        
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .menu-button {
+            padding: 18px 30px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(90deg, var(--cucumber-color), var(--beetroot-color));
+            color: white;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .menu-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--beetroot-color), var(--cucumber-color));
+            transition: all 0.5s ease;
+            z-index: -1;
+        }
+        
+        .menu-button:hover::before {
+            left: 0;
+        }
+        
+        .menu-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .quiz-container {
+            width: 100%;
+            max-width: 800px;
+            display: none;
+            animation: slideInUp 0.8s ease-in-out;
+        }
+        
+        .question-counter {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--cucumber-color), var(--beetroot-color));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .question {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            font-size: 1.4rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .option {
+            padding: 16px 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        .option.cucumber-answer {
+            border-left: 5px solid var(--cucumber-color);
+        }
+        
+        .option.beetroot-answer {
+            border-left: 5px solid var(--beetroot-color);
+        }
+        
+        .option.selected {
+            background-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        
+        .result-container {
+            display: none;
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        
+        .result-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .result-image {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            animation: bounce 1s ease infinite;
+        }
+        
+        .result-description {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .result-stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        
+        .cucumber-stat {
+            color: var(--cucumber-color);
+        }
+        
+        .beetroot-stat {
+            color: var(--beetroot-color);
+        }
+        
+        .about-container {
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            display: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-top: 30px;
+            animation: fadeIn 1s ease-in-out;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .about-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+        
+        .about-text {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        
+        .back-button {
+            margin-top: 30px;
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        .sound-control {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .sound-control:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .sound-icon {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+        
+        .floating {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            pointer-events: none;
+            opacity: 0.4;
+            z-index: -1;
+            animation: float 15s infinite linear;
+        }
+        
+        .cucumber {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M85,35c0,0-20-30-45-30S5,35,5,35s20,30,45,30S85,35,85,35z" fill="%232D9D39"/></svg>') no-repeat center center;
+            filter: drop-shadow(0 0 8px rgba(45, 157, 57, 0.8));
+        }
+        
+        .beetroot {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%238E244D"/><path d="M50,10c0,0,20,20,0,40s0,40,0,40" stroke="%23F7D02F" stroke-width="2" fill="none"/></svg>') no-repeat center center;
+            filter: drop-shadow(0 0 8px rgba(142, 36, 77, 0.8));
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideInUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.4;
+            }
+            90% {
+                opacity: 0.4;
+            }
+            100% {
+                transform: translate(calc(100vw - 100px), calc(100vh - 100px)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 3rem;
+            }
+            
+            .title span.versus {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .button-container {
+                max-width: 300px;
+            }
+            
+            .menu-button {
+                padding: 15px 25px;
+                font-size: 1.3rem;
+            }
+            
+            .question {
+                font-size: 1.2rem;
+                padding: 20px;
+            }
+            
+            .result-title {
+                font-size: 2.5rem;
+            }
+            
+            .result-image {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Floating elements for background animation -->
+        <div class="floating cucumber" style="top: 10%; left: 10%;"></div>
+        <div class="floating beetroot" style="top: 30%; left: 80%;"></div>
+        <div class="floating cucumber" style="top: 80%; left: 20%;"></div>
+        <div class="floating beetroot" style="top: 60%; left: 70%;"></div>
+        
+        <!-- Sound control -->
+        <div class="sound-control" id="soundControl">
+            <svg class="sound-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 3L6 9H2v6h4l6 6V3zm4 7.5c0-1.8-1-3.3-2.5-4v8c1.5-.7 2.5-2.2 2.5-4z"/>
+            </svg>
+        </div>
+        
+        <!-- Main Menu -->
+        <div class="menu-screen" id="menuScreen">
+            <h1 class="title">
+                <span>Огірок</span>
+                <span class="versus">чи</span>
+                <span>Буряк</span>
+            </h1>
+            <p class="subtitle">Інтерактивний квіз, щоб визначити, хто ви насправді</p>
+            <div class="button-container">
+                <button class="menu-button" id="startButton">Розпочати квіз</button>
+                <button class="menu-button" id="aboutButton">Про квіз</button>
+                
+            </div>
+        </div>
+        
+        <!-- Quiz Container -->
+        <div class="quiz-container" id="quizContainer">
+            <div class="question-counter" id="questionCounter">Питання 1 з 10</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="question" id="questionText">Тут з'явиться питання</div>
+            <div class="options" id="optionsContainer">
+                <!-- Options will be generated dynamically -->
+            </div>
+        </div>
+        
+        <!-- Results Container -->
+        <div class="result-container" id="resultContainer">
+            <h2 class="result-title" id="resultTitle">Ваш результат</h2>
+            <div class="result-image" id="resultImage"></div>
+            <div class="result-description" id="resultDescription"></div>
+            <div class="result-stats">
+                <div class="stat">
+                    <div class="stat-label">Огірок</div>
+                    <div class="stat-value cucumber-stat" id="cucumberScore">0%</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Буряк</div>
+                    <div class="stat-value beetroot-stat" id="beetrootScore">0%</div>
+                </div>
+            </div>
+            <button class="back-button" id="restartButton">Спробувати знову</button>
+            <button class="back-button" id="shareButton">Поділитися результатом</button>
+        </div>
+        
+        <!-- About Container -->
+        <div class="about-container" id="aboutContainer">
+            <h2 class="about-title">Про квіз "Огірок чи Буряк"</h2>
+            <p class="about-text">
+                Ласкаво просимо до інтерактивного квізу "Огірок чи Буряк"! Цей квіз допоможе вам визначити, чи ви більше схожі на огірок, чи на буряк.
+            </p>
+            <p class="about-text">
+                Квіз складається з 10 питань, кожне з яких наблизить вас до розуміння вашої справжньої сутності. Відповідайте чесно та дізнайтеся, яка рослина відображає ваш характер!
+            </p>
+            <p class="about-text">
+                Сприймайте результати надто серйозно.
+            </p>
+            <button class="back-button" id="backToMenuButton">Повернутися до меню</button>
+        </div>
+    </div>
+
+    <script>
+
+document.addEventListener("DOMContentLoaded", function () {
+    const backToMenuButton = document.getElementById("backToMenuButton");
+    const aboutContainer = document.getElementById("aboutContainer");
+    const menuScreen = document.getElementById("menuScreen");
+
+    backToMenuButton.addEventListener("click", function () {
+        aboutContainer.style.display = "none";
+        menuScreen.style.display = "block";
+    });
+});
+
+        // Quiz questions and options
+        const questions = [
+            {
+                question: "Що ти зробиш, якщо побачиш голуба?",
+        options: [
+            { text: "Почну з ним переговори", type: "cucumber" },
+            { text: "Постараюсь не дивитися йому в очі", type: "beetroot" },
+            { text: "Кину йому крихту і подивлюся, що буде(погана кінцівка)", type: "cucumber" },
+            { text: "Зроблю вигляд, що не помітив", type: "beetroot" }
+        ]
+            },
+            {
+                question: "Якому кольору ви надаєте перевагу?",
+                options: [
+                    { text: "Зеленому", type: "cucumber" },
+                    { text: "Червоному", type: "beetroot" },
+                    { text: "Яскравим кольорам", type: "cucumber" },
+                    { text: "Глибоким, насиченим тонам", type: "beetroot" }
+                ]
+            },
+            {
+                question: "Як ви реагуєте на стрес?",
+                options: [
+                    { text: "Зберігаю спокій", type: "beetroot" },
+                    { text: "Негативно", type: "cucumber" },
+                    { text: "Дайте админку", type: "cucumber" },
+                    { text: "Аналізую причини та наслідки", type: "beetroot" }
+                ]
+            },
+            {
+                question: "Як ти відреагуєш, якщо побачиш кота, який підозріло дивиться на тебе?",
+        options: [
+            { text: "Підморгну йому", type: "cucumber" },
+            { text: "Спробую видатися за свого", type: "cucumber" },
+            { text: "Почну аналізувати, що він задумав", type: "beetroot" },
+            { text: "Зроблю вигляд, що не помічаю", type: "beetroot" }
+        ]
+            },
+            {
+                question: "Яку роль ви зазвичай виконуєте в команді?",
+                options: [
+                    { text: "Генератор ідей", type: "beetroot" },
+                    { text: "Аналітик", type: "beetroot" },
+                    { text: "Комунікатор", type: "cucumber" },
+                    { text: "Долбаеб", type: "cucumber" }
+                ]
+            },
+            {
+                question: "Коли ви приймаєте рішення, ви більше покладаєтесь на:",
+                options: [
+                    { text: "Інтуїцію", type: "cucumber" },
+                    { text: "Логіку", type: "beetroot" },
+                    { text: "Попередній досвід", type: "beetroot" },
+                    { text: "Рандом", type: "cucumber" }
+                ]
+            },
+            {
+                question: "Що вас більше захоплює?",
+                options: [
+                    { text: "майнкрафт", type: "cucumber" },
+                    { text: "роблокс", type: "cucumber" },
+                    { text: "геометри деш", type: "cucumber" },
+                    { text: "ПК ігри", type: "beetroot" }
+                ]
+            },
+            {
+                question: "Як ви ставитесь до Кіріла?",
+                options: [
+                    { text: "Нормально", type: "beetroot" },
+                    { text: "Пасивна агресія", type: "beetroot" },
+                    { text: "Сюжетка крутая була", type: "cucumber" },
+                    { text: "ПОфиг", type: "cucumber" }
+                ]
+            },
+            {
+                question: "Яка пора року вам більше до вподоби?",
+                options: [
+                    { text: "Літо", type: "cucumber" },
+                    { text: "Осінь", type: "beetroot" },
+                    { text: "Весна", type: "cucumber" },
+                    { text: "Зима", type: "beetroot" }
+                ]
+            },
+            {
+                question: "Що важливіше для вас?",
+                options: [
+                    { text: "Bombardiro Crocodilo", type: "cucumber" },
+                    { text: "Bombombini gussini", type: "beetroot" },
+                    { text: "Gitler", type: "cucumber" },
+                    { text: "Розвиватися", type: "beetroot" }
+                ]
+            }
+        ];
+        
+        // DOM elements
+        const menuScreen = document.getElementById('menuScreen');
+        const quizContainer = document.getElementById('quizContainer');
+        const resultContainer = document.getElementById('resultContainer');
+        const aboutContainer = document.getElementById('aboutContainer');
+        const questionCounter = document.getElementById('questionCounter');
+        const progressBar = document.getElementById('progressBar');
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultImage = document.getElementById('resultImage');
+        const resultDescription = document.getElementById('resultDescription');
+        const cucumberScore = document.getElementById('cucumberScore');
+        const beetrootScore = document.getElementById('beetrootScore');
+        const soundControl = document.getElementById('soundControl');
+        
+        // Button elements
+        const startButton = document.getElementById('startButton');
+        const aboutButton = document.getElementById('aboutButton');
+        const restartButton = document.getElementById('restartButton');
+        const shareButton = document.getElementById('shareButton');
+        const backToMenuButton = document.getElementById('backToMenuButton');
+        
+        // Quiz state
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let soundEnabled = true;
+        
+        // Audio elements
+        const clickSound = new Audio('tech-quiz-thinking-time-243083.mp3');
+        const resultSound = new Audio('jazz-bossa-nova-cooking-show-music-312826.mp3');
+        
+        // Button click handlers
+        startButton.addEventListener('click', startQuiz);
+        aboutButton.addEventListener('click', showAbout);
+        restartButton.addEventListener('click', restartQuiz);
+        shareButton.addEventListener('click', shareResult);
+        backToMenuButton.addEventListener('click', backToMenu);
+        soundControl.addEventListener('click', toggleSound);
+        
+        
+        // Function to start the quiz
+        function startQuiz() {
+            playSound(clickSound);
+            menuScreen.style.display = 'none';
+            quizContainer.style.display = 'block';
+            currentQuestion = 0;
+            userAnswers = [];
+            loadQuestion();
+        }
+        
+        // Function to load a question
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            questionCounter.textContent = `Питання ${currentQuestion + 1} з ${questions.length}`;
+            progressBar.style.width = `${(currentQuestion / questions.length) * 100}%`;
+            questionText.textContent = question.question;
+            
+            // Clear options container
+            optionsContainer.innerHTML = '';
+            
+            // Create options
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = `option ${option.type}-answer`;
+                optionElement.textContent = option.text;
+                optionElement.addEventListener('click', () => selectOption(index, option.type));
+                optionsContainer.appendChild(optionElement);
+            });
+        }
+        
+        // Function to handle option selection
+        function selectOption(optionIndex, optionType) {
+            playSound(clickSound);
+            userAnswers.push(optionType);
+            
+            // Highlight selected option
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[optionIndex].classList.add('selected');
+            
+            // Short delay before next question
+            setTimeout(() => {
+                currentQuestion++;
+                if (currentQuestion < questions.length) {
+                    loadQuestion();
+                } else {
+                    showResult();
+                }
+            }, 500);
+        }
+        
+        // Function to show the quiz result
+        function showResult() {
+            playSound(resultSound);
+            quizContainer.style.display = 'none';
+            resultContainer.style.display = 'block';
+            
+            // Calculate scores
+            const cucumberCount = userAnswers.filter(answer => answer === 'cucumber').length;
+            const beetrootCount = userAnswers.filter(answer => answer === 'beetroot').length;
+            const cucumberPercentage = (cucumberCount / questions.length) * 100;
+            const beetrootPercentage = (beetrootCount / questions.length) * 100;
+            
+            // Update result UI
+            cucumberScore.textContent = `${Math.round(cucumberPercentage)}%`;
+            beetrootScore.textContent = `${Math.round(beetrootPercentage)}%`;
+            
+            // Determine dominant type
+            if (cucumberPercentage > beetrootPercentage) {
+                resultTitle.textContent = "Ви — Огірок!";
+                resultTitle.style.color = 'var(--cucumber-color)';
+                resultImage.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M85,35c0,0-20-30-45-30S5,35,5,35s20,30,45,30S85,35,85,35z" fill="%232D9D39"/></svg>')`;
+                resultImage.style.boxShadow = '0 0 30px rgba(45, 157, 57, 0.6)';
+                resultDescription.innerHTML = `
+                    <p>Ви — Огірок!Ви — Огірок!Ви — Огірок!Ви — Огірок!Ви — Огірок!Ви — Огірок!Ви — Огірок!Ви — Огірок!</p>
+                    <p>Ви — Огірок!Ви — Огірок!Ви — Огірок!Ви — Огірок!Ви — Огірок!Ви — Огірок!Ви — Огірок!Ви — Огірок!</p>
+                    <p>Люди навколо вас співчувають вам.</p>
+                `;
+            } else {
+                resultTitle.textContent = "Ви — Буряк!";
+                resultTitle.style.color = 'var(--beetroot-color)';
+                resultImage.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%238E244D"/><path d="M50,10c0,0,20,20,0,40s0,40,0,40" stroke="%23F7D02F" stroke-width="2" fill="none"/></svg>')`;
+                resultImage.style.boxShadow = '0 0 30px rgba(142, 36, 77, 0.6)';
+                resultDescription.innerHTML = `
+                    <p>Ви — Буряк!Ви — Буряк!Ви — Буряк!Ви — Буряк!Ви — Буряк!Ви — Буряк!Ви — Буряк!Ви — Буряк!Ви — Буряк!</p>
+                    <p>Як буряк, ви маєте глибокий внутрішній світ, багатий емоціями та думками. Ви вдумливі, уважні до деталей і віддаєте перевагу структурованому підходу до життя.</p>
+                    <p>Люди навколо вас цінують вашу мудрість, здатність глибоко аналізувати ситуації та ваш спокій у складних обставинах.</p>
+                `;
+            }
+        }
+        
+        function restartQuiz() {
+            resultContainer.style.display = 'none';
+            menuScreen.style.display = 'block';
+        }
+
+        function showAbout() {
+            menuScreen.style.display = 'none';
+            aboutContainer.style.display = 'block';
+        }
+
+        function backToMenu() {
+            aboutContainer.style.display = 'none';
+            menuScreen.style.display = 'block';
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+        }
+
+        function playSound(sound) {
+            if (soundEnabled) {
+                sound.play();
+            }
+        }
+    </script>
+</body>
+</html>
